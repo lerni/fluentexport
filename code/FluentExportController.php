@@ -1,13 +1,12 @@
 <?php
 // todo:
-// className multiple times -> block
-// show fieldnames as table-header
 // group output by classes
+// sort vs. hierarchical
+// has_ons -> FieldID Link if possible
 // CSV-Export and complete (all tables) archive.tar.gz
 // does this FluentContentController extension make sense
 	// rename config file
 // have Table & Lang-Nav Bootstrap styled
-// stripe-out has_ons -> FieldID or Link if possible
 // Template & Lang & JS?
 
 class FluentExportController extends Controller {
@@ -23,7 +22,7 @@ class FluentExportController extends Controller {
 	}
 
 	public function Title() {
-		return "Export translated Fields per Langauage";
+		return "Export translated Fields";
 	}
 
 	public function Locales() {
@@ -59,14 +58,24 @@ class FluentExportController extends Controller {
 	// Items as html table
 	public function showItems() {
 		$table = $this->getItems();
+		$i = 0;
+		$len = count($table);
 		$out = "<table>";
-		foreach ($table as $row) {
-			$out .= "<tr>";
-				foreach($row as $subkey => $subelement){
-					$out .= "<td>$subelement</td>";
+
+			foreach ($table as $row) {
+				$out .= "<tr>";
+				if ($i == 0) {
+					foreach($row as $subkey => $subelement){
+						$out .= "<th>$subelement</th>";
+					}
+				} else {
+					foreach($row as $subkey => $subelement){
+						$out .= "<td>$subelement</td>";
+					}
 				}
-			$out .= "</tr>";
-		}
+				$out .= "</tr>";
+				$i++;
+			}
 		$out .= "</table>";
 		return $out;
 
@@ -85,13 +94,16 @@ class FluentExportController extends Controller {
 
 	public function CurrentItem() {
 		if ($getVars = $this->getRequest()->getVars()) {
-			return $getVars['items'];
+			if (isset($getVars['items'])) {
+				return $getVars['items'];
+			}
 		}
 	}
 
 	// get all fields translated for a certain class with Ancestrys as array leaded with a linked ID, ClassName
 	public function getItems() {
 		$getVars = $this->getRequest()->getVars();
+		$flatheader = array();
 		$tableOut = array();
 		$header = array(array('ID','ClassName'));
 		if (isset($getVars['items'])) {
@@ -106,18 +118,20 @@ class FluentExportController extends Controller {
 					}
 				}
 				$j = 0;
-				foreach($this->getAncestrysTranslatedFields($Item) as $table => $fields) {
-					// let ID be a link
-					if ($j == 0 && $Item->hasMethod('Link')) {
-						array_push($row, '<a = href="'. $Item->Link() .'">' . $Item->ID . '</a>');
-					}
-					// show just ID
-					if ($j == 0 && !$Item->hasMethod('Link')) {
-						array_push($row, $Item->ID);
-					}
-					// add ClassName
-					array_push($row, $Item->ClassName);
 
+				// let ID be a link
+				if ($j == 0 && $Item->hasMethod('Link')) {
+					array_push($row, '<a = href="'. $Item->Link() .'">' . $Item->ID . '</a>');
+				}
+				// show just ID
+				if ($j == 0 && !$Item->hasMethod('Link')) {
+					array_push($row, $Item->ID);
+				}
+
+				// add ClassName
+				array_push($row, $Item->ClassName);
+
+				foreach($this->getAncestrysTranslatedFields($Item) as $table => $fields) {
 					foreach($fields as $field) {
 						array_push($row, $Item->$field);
 					}
@@ -126,17 +140,15 @@ class FluentExportController extends Controller {
 				array_push($tableOut, $row);
 				$i++;
 			}
-		}
-		$flatheader = array();
-		foreach($header as $values) {
-			foreach($values as $field) {
-				array_push($flatheader, $field);
+			foreach($header as $values) {
+				foreach($values as $field) {
+					array_push($flatheader, $field);
+				}
 			}
 		}
-		debug::dump($flatheader);
-//		debug::dump($tableOut['0']);
+		$flatheader = array_unique(array_values($flatheader));
 
-		return($tableOut);
+		return(array($flatheader)+$tableOut);
 	}
 
 	// gets TranslatedFields within all ancestries

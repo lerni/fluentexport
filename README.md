@@ -1,4 +1,4 @@
-# Export SilverStripe Fluent translated Fields
+# Export SilverStripe Fluent translated Fields - work in progress
 This module allows you to get Fluent translated Fields (from stage "live") as html-table
 
 ## Requirements
@@ -21,4 +21,4 @@ Visit `http://yoursite/fluent-export`
 - [ ] LangSwitch
 - [ ] CSV export
 - [ ] Import
-- [ ] kinda diff-mode per colors in preview
+- [ ] Lang & JS translation
