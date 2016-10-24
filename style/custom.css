@@ -1,0 +1,18 @@
+nav a.obj {
+	display:inline-block;
+	margin: .5rem .5rem 0 0;
+	padding:.3rem;
+	border:1px solid grey;
+}
+nav a.obj.current {
+	background-color: lightgrey;
+}
+table {
+	margin:1rem 0;
+	width:100%;
+}
+td {
+	vertical-align: top;
+	border:1px solid grey;
+	padding:.3rem;
+}

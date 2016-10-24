@@ -1,0 +1,26 @@
+{
+	"name": "lerni/fluent-translated-fields",
+	"description": "Export SilverStripe Fluent translated Fields",
+	"type": "silverstripe-module",
+	"keywords": [
+        "silverstripe", "localisation", "localization", "translation", "language", "locale", "multilingual",
+        "export", "csv", "import"
+    ],
+	"license": "BSD-3-Clause",
+	"authors": [
+		{
+			"name": "Lukas Erni",
+			"email": "le@kraftausdruck.com"
+		}
+	],
+	"support": {
+		"issues": "http://github.com/lerni/fluent-translated-fields/issues"
+	},
+	"require": {
+		"silverstripe/framework": "~3.2",
+		"tractorcow/silverstripe-fluent": "~3.2"
+	},
+	"extra": {
+		"installer-name": "fluentexport"
+	}
+}
