@@ -14,7 +14,7 @@ nav a.obj.current {
 }
 table {
 	margin:1rem 0;
-	width:100%;
+	min-width:100%;
 }
 td {
 	vertical-align: top;

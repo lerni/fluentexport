@@ -1,6 +1,6 @@
 <?php
 // todo:
-// group output by classes
+// group output by classes & show header for all fields
 // sort vs. hierarchical
 // has_ons -> FieldID Link if possible
 // CSV-Export and complete (all tables) archive.tar.gz
@@ -15,7 +15,6 @@ class FluentExportController extends Controller {
 
 	public function init() {
 		parent::init();
-		$this->getClasses();
 		if (!Permission::check('ADMIN')) {
 			Security::permissionFailure();
 		}
@@ -61,7 +60,6 @@ class FluentExportController extends Controller {
 		$i = 0;
 		$len = count($table);
 		$out = "<table>";
-
 			foreach ($table as $row) {
 				$out .= "<tr>";
 				if ($i == 0) {
@@ -148,7 +146,7 @@ class FluentExportController extends Controller {
 		}
 		$flatheader = array_unique(array_values($flatheader));
 
-		return(array($flatheader)+$tableOut);
+		return(array_merge(array($flatheader),$tableOut));
 	}
 
 	// gets TranslatedFields within all ancestries
