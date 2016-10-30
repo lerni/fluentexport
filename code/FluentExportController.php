@@ -15,6 +15,7 @@ class FluentExportController extends Controller {
 
 	public function init() {
 		parent::init();
+		static::requirements();
 		if (!Permission::check('ADMIN')) {
 			Security::permissionFailure();
 		}
@@ -29,29 +30,34 @@ class FluentExportController extends Controller {
 		return false;
 	}
 
-	// requirements didn't work with just a controller
-	// todo: smth more light than bootstrap and this ugly file-includes
-	public function inliningStyle() {
-		if (file_exists("../fluentexport/style/bootstrap.css")) {
-			$bootstrapcss = file_get_contents("../fluentexport/style/bootstrap.css");
-		} else {
-			$bootstrapcss = '';
-		}
-		if (file_exists("../fluentexport/style/custom.css")) {
-			$customcss = file_get_contents("../fluentexport/style/custom.css");
-		} else {
-			$customcss = '';
-		}
-
-		return '<style type="text/css">' . $bootstrapcss .' '. $customcss . '</style>';
+	public static function requirements() {
+		Requirements::css('fluentexport/style/bootstrap.css');
+		Requirements::css('fluentexport/style/custom.css');
 	}
 
+//	// requirements didn't work with just a controller
+//	// todo: smth more light than bootstrap and this ugly file-includes
+//	public function inliningStyle() {
+//		if (file_exists("../fluentexport/style/bootstrap.css")) {
+//			$bootstrapcss = file_get_contents("../fluentexport/style/bootstrap.css");
+//		} else {
+//			$bootstrapcss = '';
+//		}
+//		if (file_exists("../fluentexport/style/custom.css")) {
+//			$customcss = file_get_contents("../fluentexport/style/custom.css");
+//		} else {
+//			$customcss = '';
+//		}
+//
+//		return '<style type="text/css">' . $bootstrapcss .' '. $customcss . '</style>';
+//	}
+
 	public function Content() {
-		$style = $this->inliningStyle();
+
 		$langs = ''; // $this->Locales()
 		$tables = $this->FluentClasses();
 		$content = $this->showItems();
-		return $style . $langs . $tables . $content;
+		return $langs . $tables . $content;
 	}
 
 	// Items as html table
