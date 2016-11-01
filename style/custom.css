@@ -1,26 +1,31 @@
-/* overload debug.css */
+/* html-prefix for overload debug.css */
+/*html *,*/
+/*html *:after,*/
+/*html *:before {*/
+	/*box-sizing: border-box;*/
+/*}*/
 html body {
 	overflow-x: auto;
+	background-color:transparent !important;
 }
-
 html a {
 	color:#0275d8;
 }
-nav a.obj {
-	display:inline-block;
-	margin: .5rem .5rem 0 0;
-	padding:.3rem;
-	border:1px solid grey;
+html ul.nav {
+	margin-bottom:2rem;
 }
-nav a.obj.current {
-	background-color: lightgrey;
+html .options {
+	background-color:transparent !important;
+	margin: 1rem 0;
 }
-table {
-	margin:1rem 0;
+a.nav-link {
+	font-size: 1.1rem;
+}
+html table {
+	margin: 0;
 	min-width:100%;
 }
-td {
-	vertical-align: top;
-	border:1px solid grey;
-	padding:.3rem;
+html .table tr th,
+html .table tr td {
+	padding:.3rem .6rem;
 }

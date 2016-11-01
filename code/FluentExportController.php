@@ -1,13 +1,19 @@
 <?php
 // todo:
-// group output by classes & show header for all fields
+//subitems in navigation
+// has_ons -> FieldID Link if possible -> icons? what is in bootstrap?
+// DO vs. ArrayData
+// lang-switch
+// 		http://v4-alpha.getbootstrap.com/components/dropdowns/
+// make additional fields like id & ClassName configurable
 // sort vs. hierarchical
-// has_ons -> FieldID Link if possible
 // CSV-Export and complete (all tables) archive.tar.gz
-// does this FluentContentController extension make sense
-	// rename config file
-// have Table & Lang-Nav Bootstrap styled
-// Template & Lang & JS?
+// 		home-dashboard for exporting
+// does FluentContentController extension make sense
+// rename config file
+// make live vs. stage selectable
+//		show warning if a live-record has a newer staged version
+// include Template & Lang & JS for export?
 
 class FluentExportController extends Controller {
 
@@ -25,9 +31,18 @@ class FluentExportController extends Controller {
 		return "Export translated Fields";
 	}
 
-	public function Locales() {
-		if ($Locales = Fluent::locales()) return ViewableData::customise(array("Locale" => $Locales))->renderWith("LangNav");
-		return false;
+	// todo: be meaningful
+	public function LangNav() {
+		if ($langs = Fluent::locales()) {
+			$ArrayList = new ArrayList();
+			foreach	($langs as $lang) {
+				$f = DataObject::create();
+				$f->Lang = $lang;
+				$ArrayList->push($f);
+			}
+			if ($ArrayList) return($ArrayList);
+			return false;
+		}
 	}
 
 	public static function requirements() {
@@ -35,67 +50,35 @@ class FluentExportController extends Controller {
 		Requirements::css('fluentexport/style/custom.css');
 	}
 
-//	// requirements didn't work with just a controller
-//	// todo: smth more light than bootstrap and this ugly file-includes
-//	public function inliningStyle() {
-//		if (file_exists("../fluentexport/style/bootstrap.css")) {
-//			$bootstrapcss = file_get_contents("../fluentexport/style/bootstrap.css");
-//		} else {
-//			$bootstrapcss = '';
-//		}
-//		if (file_exists("../fluentexport/style/custom.css")) {
-//			$customcss = file_get_contents("../fluentexport/style/custom.css");
-//		} else {
-//			$customcss = '';
-//		}
-//
-//		return '<style type="text/css">' . $bootstrapcss .' '. $customcss . '</style>';
-//	}
-
-	public function Content() {
-
-		$langs = ''; // $this->Locales()
-		$tables = $this->FluentClasses();
-		$content = $this->showItems();
-		return $langs . $tables . $content;
+	// used for navigation - todo: remove and use the same getter as for tables
+	public function ContentTables()	{
+		$result = $this->getItems();
+		if ($result) return($result);
+		return false;
 	}
 
-	// Items as html table
+	// Items for Template
 	public function showItems() {
-		$table = $this->getItems();
-		$i = 0;
-		$len = count($table);
-		$out = "<table>";
-			foreach ($table as $row) {
-				$out .= "<tr>";
-				if ($i == 0) {
+		$tables = $this->getItems();
+		$result = ArrayList::create();
+		if($tables) {
+			foreach ($tables as $table) {
+				$topush = ArrayList::create();
+				foreach ($table as $row) {
+					$topushNest1 = ArrayList::create();
 					foreach($row as $subkey => $subelement){
-						$out .= "<th>$subelement</th>";
+						$topushNest1->push(array('item' => $subelement));
 					}
-				} else {
-					foreach($row as $subkey => $subelement){
-						$out .= "<td>$subelement</td>";
-					}
+					$topush->push($topushNest1);
 				}
-				$out .= "</tr>";
-				$i++;
+				$result->push($topush);
 			}
-		$out .= "</table>";
-		return $out;
-
-//		$result = ArrayList::create();
-//		$table = $this->getItems();
-//
-//		foreach ($table as $row) {
-//			foreach($row as $subkey => $subelement){
-//					$r = ArrayData::create(array($subkey => $subelement)); //you can oop over an ArrayList
-//					$result->push($r);
-//			}
-//    	}
-//		if ($result) return ViewableData::customise(array("FluentClasses" => $result))->renderWith("ItemTable");
-//		return false;
+		}
+		if ($result) return($result);
+		return false;
 	}
 
+	// navigation
 	public function CurrentItem() {
 		if ($getVars = $this->getRequest()->getVars()) {
 			if (isset($getVars['items'])) {
@@ -104,55 +87,62 @@ class FluentExportController extends Controller {
 		}
 	}
 
-	// get all fields translated for a certain class with Ancestrys as array leaded with a linked ID, ClassName
-	public function getItems() {
+	// get all fields translated for a certain class with Ancestries as array leaded with a ID & ClassName
+	public function getItems()
+	{
 		$getVars = $this->getRequest()->getVars();
-		$flatheader = array();
-		$tableOut = array();
-		$header = array(array('ID','ClassName'));
+		$descentClasses = array();
+		$allTables = array();
 		if (isset($getVars['items'])) {
-			$Items = Versioned::get_by_stage($getVars['items'], 'Live');
-			$i = 0;
-			foreach($Items as $Item) {
-				$row = array();
-				// header as field names
-				if(!isset($j)) {
+			$descentClasses = array_unique($Items = Versioned::get_by_stage($getVars['items'], 'Live')->Column("ClassName"));
+			$allItems = Versioned::get_by_stage($getVars['items'], 'Live');
+			foreach ($descentClasses as $table) {
+				$tableOut = array();
+				$flatheader = array();
+				$header = array(array('ID', 'ClassName'));
+				$Items = $allItems->filter("ClassName", $table);
+				$i = 0;
+				foreach($Items as $Item) {
+					$j = 0;
+					$row = array();
+
+					// header as field names
 					foreach($this->getAncestrysTranslatedFields($Item) as $fields) {
 						array_push($header, $fields);
 					}
-				}
-				$j = 0;
 
-				// let ID be a link
-				if ($j == 0 && $Item->hasMethod('Link')) {
-					array_push($row, '<a = href="'. $Item->Link() .'">' . $Item->ID . '</a>');
-				}
-				// show just ID
-				if ($j == 0 && !$Item->hasMethod('Link')) {
-					array_push($row, $Item->ID);
-				}
-
-				// add ClassName
-				array_push($row, $Item->ClassName);
-
-				foreach($this->getAncestrysTranslatedFields($Item) as $table => $fields) {
-					foreach($fields as $field) {
-						array_push($row, $Item->$field);
+					// let ID be a link
+					if ($j == 0 && $Item->hasMethod('Link')) {
+						array_push($row, '<a = href="'. $Item->Link() .'">' . $Item->ID . '</a>');
 					}
-					$j++;
-				}
-				array_push($tableOut, $row);
-				$i++;
-			}
-			foreach($header as $values) {
-				foreach($values as $field) {
-					array_push($flatheader, $field);
-				}
-			}
-		}
-		$flatheader = array_unique(array_values($flatheader));
+					// show just ID
+					if ($j == 0 && !$Item->hasMethod('Link')) {
+						array_push($row, $Item->ID);
+					}
 
-		return(array_merge(array($flatheader),$tableOut));
+					// add ClassName
+					array_push($row, $Item->ClassName);
+
+					foreach($this->getAncestrysTranslatedFields($Item) as $table => $fields) {
+						foreach($fields as $field) {
+							array_push($row, $Item->$field);
+						}
+						$j++;
+					}
+					array_push($tableOut, $row);
+					$i++;
+				}
+				foreach($header as $values) {
+					foreach($values as $field) {
+						array_push($flatheader, $field);
+					}
+				}
+				$flatheader = array_unique(array_values($flatheader));
+				$allTables["$table"] = array_merge(array($flatheader),$tableOut);
+				//debug::dump($allTables["$table"]);
+			}
+			return $allTables;
+		}
 	}
 
 	// gets TranslatedFields within all ancestries
@@ -209,7 +199,7 @@ class FluentExportController extends Controller {
 			$f->Name = $Class;
 			$result->push($f);
 		}
-		if ($result) return ViewableData::customise(array("FluentClasses" => $result))->renderWith("FluentItemTable");
+		if ($result) return($result);
 		return false;
 	}
 }

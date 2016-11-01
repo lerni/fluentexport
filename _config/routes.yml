@@ -1,6 +1,6 @@
 Director:
   rules:
     'fluent-export': 'FluentExportController'
-FluentExportController:
-  extensions:
-    - FluentContentController
+#FluentExportController:
+#  extensions:
+#    - FluentContentController
