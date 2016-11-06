@@ -6,7 +6,7 @@
 		$MetaTags
 		<% require css('framework/css/debug.css') %>
 	</head>
-	<body>
+	<body <% if $i18nScriptDirection %>dir="$i18nScriptDirection"<% end_if %>>
 		<div class="info">
 			<h1><% if $Title %>$Title<% else %>Welcome to SilverStripe<% end_if %></h1>
 			<% include LangNav %>

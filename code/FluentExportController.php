@@ -6,18 +6,18 @@
 // lang-switch
 // 		http://v4-alpha.getbootstrap.com/components/dropdowns/
 // make additional fields like id & ClassName configurable
+	// "hardcodedColumns" grey-out
 // sort vs. hierarchical
 // CSV-Export and complete (all tables) archive.tar.gz
 // 		home-dashboard for exporting
 // does FluentContentController extension make sense
 // rename config file
-// make live vs. stage selectable
-//		show warning if a live-record has a newer staged version
+// show warning if a live-record has a newer staged version
 // include Template & Lang & JS for export?
 
 class FluentExportController extends Controller {
 
-	public static $allowed_actions = array();
+	public static $allowed_actions = [];
 
 	public function init() {
 		parent::init();
@@ -67,7 +67,7 @@ class FluentExportController extends Controller {
 				foreach ($table as $row) {
 					$topushNest1 = ArrayList::create();
 					foreach($row as $subkey => $subelement){
-						$topushNest1->push(array('item' => $subelement));
+						$topushNest1->push(['item' => $subelement]);
 					}
 					$topush->push($topushNest1);
 				}
@@ -87,24 +87,24 @@ class FluentExportController extends Controller {
 		}
 	}
 
-	// get all fields translated for a certain class with Ancestries as array leaded with a ID & ClassName
+	// get classes with Ancestries as class grouped-array (tables). The first two columns of each table are ID & ClassName
 	public function getItems()
 	{
 		$getVars = $this->getRequest()->getVars();
-		$descentClasses = array();
-		$allTables = array();
+		$descentClasses = [];
+		$allTables = [];
 		if (isset($getVars['items'])) {
 			$descentClasses = array_unique($Items = Versioned::get_by_stage($getVars['items'], 'Live')->Column("ClassName"));
 			$allItems = Versioned::get_by_stage($getVars['items'], 'Live');
 			foreach ($descentClasses as $table) {
-				$tableOut = array();
-				$flatheader = array();
-				$header = array(array('ID', 'ClassName'));
+				$tableOut = [];
+				$flatheader = [];
+				$header = [['ID', 'ClassName']];
 				$Items = $allItems->filter("ClassName", $table);
 				$i = 0;
 				foreach($Items as $Item) {
 					$j = 0;
-					$row = array();
+					$row = [];
 
 					// header as field names
 					foreach($this->getAncestrysTranslatedFields($Item) as $fields) {
@@ -138,7 +138,7 @@ class FluentExportController extends Controller {
 					}
 				}
 				$flatheader = array_unique(array_values($flatheader));
-				$allTables["$table"] = array_merge(array($flatheader),$tableOut);
+				$allTables["$table"] = array_merge([$flatheader],$tableOut);
 				//debug::dump($allTables["$table"]);
 			}
 			return $allTables;
@@ -147,7 +147,7 @@ class FluentExportController extends Controller {
 
 	// gets TranslatedFields within all ancestries
 	public function getAncestrysTranslatedFields($Item) {
-		$includedTables = array();
+		$includedTables = [];
 		foreach($Item->getClassAncestry() as $class) {
 			// Skip classes without tables
 			if(!DataObject::has_own_table($class)) continue;
@@ -166,7 +166,7 @@ class FluentExportController extends Controller {
 	// needs to have own_table
 	// nedds to have records
 	function getDecoratedBy($extension){
-		$classes = array();
+		$classes = [];
 		foreach(ClassInfo::subClassesFor('DataObject') as $className) {
 			if (DataObject::has_extension("$className", "$extension") && DataObject::has_own_table($className) && $className::get()->Count()) {
 				$classes[] = $className;
@@ -178,7 +178,7 @@ class FluentExportController extends Controller {
 	// -> makes sure item has TranslatedFields within all ancestries
 	// with this, we return baseClasses and later on add ClassName from DB to the Record - this way, we kinda group similar structured entries and prevent duplicates
 	public function getClasses() {
-		$BaseClassesWithFluentExtensionsAndFields = array();
+		$BaseClassesWithFluentExtensionsAndFields = [];
 		foreach ($this::getDecoratedBy("FluentExtension") as $class) {
 			$ancestry = array_values($class::get()->first()->getClassAncestry($class));
 			$firstancestry = array_values($ancestry)[0];
