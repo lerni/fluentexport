@@ -46,7 +46,8 @@ class FluentExportController extends Controller {
 	}
 
 	public static function requirements() {
-		Requirements::css('fluentexport/style/bootstrap.css');
+		Requirements::css('fluentexport/thirdparty/bootstrap.min.css');
+		Requirements::javascript('fluentexport/thirdparty/bootstrap.min.js');
 		Requirements::css('fluentexport/style/custom.css');
 	}
 
@@ -107,8 +108,10 @@ class FluentExportController extends Controller {
 					$row = [];
 
 					// header as field names
-					foreach($this->getAncestrysTranslatedFields($Item) as $fields) {
-						array_push($header, $fields);
+					if ($j == 0 && $i == 0) {
+						foreach($this->getAncestrysTranslatedFields($Item) as $fields) {
+							array_push($header, $fields);
+						}
 					}
 
 					// let ID be a link
