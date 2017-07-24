@@ -6,7 +6,7 @@
 			</li>
 			<% if $Subitem %>
 				<div class="dropdown-menu">
-					<% loop $FluentClasses %>
+					<% loop $Subitem %>
 						<a class="dropdown-item" href="/fluent-export?items={$Name}">{$Name}</a>
 					<% end_loop %>
 				</div>
@@ -14,3 +14,14 @@
 		<% end_loop %>
 	</ul>
 <% end_if %>
+<%--<% loop $showItems %>--%>
+	<%--<% loop $Me %>--%>
+		<%--<% if $Pos == 2 %>--%>
+			<%--<% loop $Me %>--%>
+				<%--<% if $Pos == 2 %>--%>
+					<%--<a href="#{$item}">{$item}</a>--%>
+				<%--<% end_if %>--%>
+			<%--<% end_loop %>--%>
+		<%--<% end_if %>--%>
+	<%--<% end_loop %>--%>
+<%--<% end_loop %>--%>
